@@ -132,7 +132,7 @@ router.put('/comments/:commentId', authMiddleware, async (req, res) => {
   const savedComment = await Comment.findOne({
     where: { id: commentId }, });
 
-  if (savedComment.user_id == user.id){
+  if (savedComment.userId == user.id){
   const upadatedComment = await Comment.update(
     { content },
     { where: 
@@ -147,9 +147,23 @@ router.put('/comments/:commentId', authMiddleware, async (req, res) => {
 })
 
 // 댓글 삭제  API
+router.delete('/comments/:CommentId', authMiddleware, async (req, res) => {
+  const { CommentId } = req.params;
+  const user = res.locals.user;
 
+  const comment = await Comment.findOne(
+    { where: { id: CommentId } });
 
-
+  if (comment && comment.userId === user.id) {
+      await Comment.destroy({ where: { id: CommentId } });
+      return res.status(200).json({ message: "댓글 삭제 완료!" });
+  } else {
+      return res.status(404).json({
+          errorMessage: "잘못된 사용자이거나 댓글이 없습니다.",
+      });
+  }
+}
+);
 
 router.get('/users/me', authMiddleware, async (req, res) =>{
     res.json({user: res.locals.user});
