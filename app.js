@@ -80,7 +80,7 @@ router.post("/login", async (req, res) => {
     return;
   }
 
-  const token = jwt.sign({ userId: user.userId }, "customized-secret-key");
+  const token = jwt.sign({ id: user.id }, "customized-secret-key");
   res.send({
     token,
   });
@@ -89,9 +89,8 @@ router.post("/login", async (req, res) => {
 // 게시글 작성 API
 router.post("/post", authMiddleware, async (req, res) => {
   const { content } = req.body;
-  const authUser = res.locals.user;
-  await Post.create({ content, authUser })
-  console.log(authUser)
+  const user = res.locals.user;
+  await Post.create({ content, userId: user.id })
   
   res.status(201).send({message: "게시글 작성 완료!"});
 });

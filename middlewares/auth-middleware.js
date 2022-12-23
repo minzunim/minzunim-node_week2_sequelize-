@@ -13,8 +13,8 @@ module.exports = (req, res, next) => {
   }
 
   try {
-    const { userId } = jwt.verify(authToken, "customized-secret-key");
-    User.findByPk(userId).then((user) => {
+    const { id } = jwt.verify(authToken, "customized-secret-key");
+    User.findByPk(id).then((user) => {
       res.locals.user = user;
       next();
     });
