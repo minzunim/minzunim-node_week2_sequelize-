@@ -90,11 +90,26 @@ router.post("/login", async (req, res) => {
 router.post("/post", authMiddleware, async (req, res) => {
   const { content } = req.body;
   const user = res.locals.user;
-  await Post.create({ content, userId: user.id })
+  await Post.create({ userId: user.id, content })
   
   res.status(201).send({message: "게시글 작성 완료!"});
 });
 
+// 댓글 작성 API
+router.post('/comments/:postId', authMiddleware, async (req, res) => {
+  const { postId } = req.params;
+  const { content } = req.body;
+  const user = res.locals.user;
+
+  if (content.length == 0){
+      return res.status(400).json({
+          errorMessage: '댓글 내용을 입력해주세요'
+      })
+  }
+
+  const createdComments = await Comment.create({userId: user.id, content, postId: postId});
+  res.json({comments: createdComments})
+})
 
 // 댓글 목록 조회 API
 router.get("/comments/:postId", async (req, res) => {
@@ -104,19 +119,6 @@ router.get("/comments/:postId", async (req, res) => {
   res.status(201).json({comments});
 });
 
-
-// 댓글 작성 API
-router.post('/comments/:postId', authMiddleware, async (req, res) => {
-  const { postId } = req.params;
-  if (content.length == 0){
-      return res.status(400).json({
-          errorMessage: '댓글 내용을 입력해주세요'
-      })
-  }
-
-  const createdComments = await Comment.create({nickname, password, content, postId});
-  res.json({comments: createdComments})
-})
 
 // 댓글 수정 API
 
