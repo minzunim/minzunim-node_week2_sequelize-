@@ -115,14 +115,40 @@ router.post('/comments/:postId', authMiddleware, async (req, res) => {
 router.get("/comments/:postId", async (req, res) => {
   const { postId } = req.params;
 
-  const comments = await Comment.findAll({ where: { postId } });
+  const comments = await Comment.findAll({
+    where: { postId },
+    order: [["createdAt", "DESC"]
+  ]});
   res.status(201).json({comments});
 });
 
 
 // 댓글 수정 API
+router.put('/comments/:commentId', authMiddleware, async (req, res) => {
+  const { commentId } = req.params;
+  const { content } = req.body;
+  const user = res.locals.user;
+
+  const savedComment = await Comment.findOne({
+    where: { id: commentId }, });
+
+  if (savedComment.user_id == user.id){
+  const upadatedComment = await Comment.update(
+    { content },
+    { where: 
+      { id: commentId },
+    });
+  res.json({message: "댓글 수정 완료!"})
+  } else {
+    return res.status(401).json({
+      errorMessage: "잘못된 사용자이거나 댓글이 없습니다."
+    })
+  }
+})
 
 // 댓글 삭제  API
+
+
 
 
 router.get('/users/me', authMiddleware, async (req, res) =>{
