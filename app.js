@@ -3,11 +3,23 @@ const app = express();
 const router = express.Router();
 
 const { Op } = require("sequelize");
-const { User, Comment } = require("./models");
+const { User, Comment, Post } = require("./models");
 const jwt = require("jsonwebtoken")
+const { sequelize } = require("./models");
+
+sequelize
+    .sync({ force: false })
+    .then(() => {
+        console.log("데이터베이스 연결 성공!");
+    })
+    .catch((err) => {
+        console.error(err);
+    });
 
 const authMiddleware = require("./middlewares/auth-middleware");
+const post = require("./models/post");
 app.use(express.json());
+
 
 // 회원가입 API
 router.post("/users", async (req, res) => {
@@ -73,6 +85,17 @@ router.post("/login", async (req, res) => {
     token,
   });
 });
+
+// 게시글 작성 API
+router.post("/post", authMiddleware, async (req, res) => {
+  const { content } = req.body;
+  const authUser = res.locals.user;
+  await Post.create({ content, authUser })
+  console.log(authUser)
+  
+  res.status(201).send({message: "게시글 작성 완료!"});
+});
+
 
 // 댓글 목록 조회 API
 router.get("/comments/:postId", async (req, res) => {
